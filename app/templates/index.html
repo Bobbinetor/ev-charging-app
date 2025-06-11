@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Home - EV Connect{% endblock %}
+{% block title %}Home - Mobility Hub{% endblock %}
 
 {% block content %}
 <div class="home-container">
     <div class="hero-section">
         <div class="hero-content">
-            <h1>La mobilità sostenibile del futuro</h1>
-            <p>Rete integrata per veicoli elettrici e a idrogeno in tutta Italia</p>
+            <h1>Semplificare la mobilità sostenibile</h1>
+            <p>La piattaforma unificata che connette conducenti e stazioni per una mobilità elettrica e a idrogeno senza barriere</p>
             <div class="hero-buttons">
                 <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Accedi</a>
                 <a href="{{ url_for('auth.register_user') }}" class="btn btn-secondary">Registrati</a>
@@ -17,37 +17,37 @@
 
     <div class="features-section">
         <div class="container">
-            <h2>Perché scegliere Sustainable Mobility Hub</h2>
+            <h2>Le opportunità che offriamo</h2>
             <div class="features">
                 <div class="feature-card">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <h3>Rete capillare</h3>
-                    <p>Più di 5.000 stazioni elettriche e idrogeno in tutta Italia con copertura capillare</p>
+                    <i class="fas fa-users"></i>
+                    <h3>Per i conducenti</h3>
+                    <p>Accedi facilmente a stazioni elettriche e idrogeno ovunque ti trovi, con prenotazioni semplici e trasparenti</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-store"></i>
+                    <h3>Per le stazioni</h3>
+                    <p>Aumenta la visibilità e l'utilizzo delle tue infrastrutture, gestisci prenotazioni e ottimizza i servizi</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-handshake"></i>
+                    <h3>Piattaforma unificata</h3>
+                    <p>Un'unica interfaccia per elettrico e idrogeno: semplifichiamo la transizione alla mobilità sostenibile</p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-leaf"></i>
-                    <h3>Multi-carburante</h3>
-                    <p>Supporto completo per veicoli elettrici e a idrogeno con un'unica piattaforma integrata</p>
+                    <h3>Impatto ambientale</h3>
+                    <p>Contribuisci alla riduzione delle emissioni supportando la crescita dell'ecosistema sostenibile</p>
                 </div>
                 <div class="feature-card">
-                    <i class="fas fa-atom"></i>
-                    <h3>Tecnologia H2</h3>
-                    <p>Stazioni di rifornimento idrogeno ad alta pressione (350/700 bar) per auto e mezzi pesanti</p>
+                    <i class="fas fa-network-wired"></i>
+                    <h3>Tecnologia avanzata</h3>
+                    <p>Monitoraggio IoT in tempo reale, sistema di fiducia e gestione intelligente delle risorse</p>
                 </div>
                 <div class="feature-card">
-                    <i class="fas fa-bolt"></i>
-                    <h3>Ricarica ultra-rapida</h3>
-                    <p>Colonnine elettriche fino a 350kW e distributori idrogeno da 2.5 kg/min</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-mobile-alt"></i>
-                    <h3>App intelligente</h3>
-                    <p>Trova stazioni per il tuo tipo di veicolo, prenota e monitora in tempo reale</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Digital Twin</h3>
-                    <p>Monitoraggio IoT in tempo reale con FIWARE per disponibilità e prestazioni ottimali</p>
+                    <i class="fas fa-rocket"></i>
+                    <h3>Crescita condivisa</h3>
+                    <p>Fai parte di una rete in espansione che cresce insieme alle tue esigenze di mobilità</p>
                 </div>
             </div>
         </div>
@@ -126,7 +126,7 @@
     }
 
     .features-section .container::after {
-        content: 'Scopri tutti i vantaggi della nostra piattaforma integrata';
+        content: 'Creiamo valore per tutti: conducenti, gestori di stazioni e ambiente';
         display: block;
         text-align: center;
         margin-bottom: 60px;

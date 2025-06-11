@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}EV Charging Network{% endblock %}</title>
+    <title>{% block title %}Sustainable Mobility Hub{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% block extra_css %}{% endblock %}
@@ -14,11 +14,11 @@
             <div class="logo">
                 {% if request.endpoint and 'dashboard' not in request.endpoint %}
                 <a href="/">
-                    <h1><i class="fas fa-charging-station"></i> EV Connect</h1>
+                    <h1><i class="fas fa-leaf"></i> Mobility Hub</h1>
                 </a>
                 {% else %}
                 <div class="logo-no-link">
-                    <h1><i class="fas fa-charging-station"></i> EV Connect</h1>
+                    <h1><i class="fas fa-leaf"></i> Mobility Hub</h1>
                 </div>
                 {% endif %}
             </div>
@@ -57,12 +57,12 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>EV Connect</h3>
-                    <p>Soluzioni innovative per la mobilità elettrica</p>
+                    <h3>Mobility Hub</h3>
+                    <p>Piattaforma unificata per la mobilità sostenibile</p>
                 </div>
                 <div class="footer-section">
                     <h3>Contatti</h3>
-                    <p><i class="fas fa-envelope"></i> info@evconnect.it</p>
+                    <p><i class="fas fa-envelope"></i> info@mobilityhub.it</p>
                     <p><i class="fas fa-phone"></i> +39 02 1234567</p>
                 </div>
                 <div class="footer-section">
@@ -75,7 +75,7 @@
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; 2025 EV Connect. Tutti i diritti riservati.</p>
+                <p>&copy; 2025 Mobility Hub. Tutti i diritti riservati.</p>
             </div>
         </div>
     </footer>
