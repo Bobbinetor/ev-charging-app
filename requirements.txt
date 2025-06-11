@@ -1,0 +1,33 @@
+# Flask e relative estensioni
+Flask==2.2.3
+Flask-SQLAlchemy==3.0.3
+Flask-Migrate==4.0.4
+Flask-Login==0.6.2
+Flask-WTF==1.1.1
+Flask-Mail==0.9.1
+Werkzeug==2.2.3
+itsdangerous==2.1.2
+Jinja2==3.1.2
+
+# Database
+psycopg2-binary==2.9.6
+SQLAlchemy==2.0.9
+alembic==1.10.4
+
+# FIWARE e API
+requests==2.28.2
+PyJWT==2.6.0
+
+# Gestione configurazione
+python-dotenv==1.0.0
+
+# Sicurezza
+email-validator==2.0.0
+cryptography==40.0.2
+
+# Server WSGI per produzione
+gunicorn==20.1.0
+
+# Utility
+pytest==7.3.1
+pytest-flask==1.2.0

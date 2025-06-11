@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Accedi - EV Connect{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Accedi</h2>
+            <p>Accedi al tuo account per gestire le tue ricariche</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                {{ form.email(class="form-control", placeholder="La tua email") }}
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        {% for error in form.email.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                {{ form.password(class="form-control", placeholder="La tua password") }}
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <div class="remember-me">
+                    {{ form.remember_me() }}
+                    <label for="remember_me">Ricordami</label>
+                </div>
+                <a href="{{ url_for('auth.reset_password_request') }}" class="forgot-password">Password dimenticata?</a>
+            </div>
+            
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Non hai un account? <a href="{{ url_for('auth.register_user') }}">Registrati</a></p>
+            <p>Gestisci una stazione di ricarica? <a href="{{ url_for('auth.register_station') }}">Registra la tua stazione</a></p>
+        </div>
+    </div>
+    
+    <div class="auth-info">
+        <div class="auth-info-content">
+            <h3>Benvenuto nella rete EV Connect</h3>
+            <p>Più di 5.000 stazioni di ricarica in tutta Italia</p>
+            <ul>
+                <li><i class="fas fa-bolt"></i> Ricarica rapida e affidabile</li>
+                <li><i class="fas fa-map-marker-alt"></i> Trova stazioni di ricarica ovunque</li>
+                <li><i class="fas fa-mobile-alt"></i> Monitora le tue ricariche in tempo reale</li>
+                <li><i class="fas fa-chart-line"></i> Analizza i tuoi consumi</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+    networks:
+      - fiware
+    command: --nojournal
+
+  orion:
+    image: fiware/orion-ld:1.0.1
+    ports:
+      - "1026:1026"
+    depends_on:
+      - mongodb
+    networks:
+      - fiware
+    command: -dbhost mongodb -logLevel DEBUG
+
+  postgres:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=evcharging
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fiware
+
+networks:
+  fiware:
+
+volumes:
+  postgres_data:

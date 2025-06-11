@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}500 - Errore del server{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <h1>500</h1>
+        <h2>Errore del server</h2>
+        <p>Si è verificato un errore interno. I nostri tecnici sono stati informati del problema.</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">Torna alla home</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        text-align: center;
+        padding: 100px 0;
+    }
+    
+    .error-content {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .error-content h1 {
+        font-size: 8rem;
+        color: var(--error-color);
+        margin-bottom: 0;
+        line-height: 1;
+    }
+    
+    .error-content h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+    
+    .error-content p {
+        color: var(--light-text);
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}

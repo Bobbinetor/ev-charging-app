@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EV Charging Network{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                {% if request.endpoint and 'dashboard' not in request.endpoint %}
+                <a href="/">
+                    <h1><i class="fas fa-charging-station"></i> EV Connect</h1>
+                </a>
+                {% else %}
+                <div class="logo-no-link">
+                    <h1><i class="fas fa-charging-station"></i> EV Connect</h1>
+                </div>
+                {% endif %}
+            </div>
+            <nav>
+                <ul>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('auth.user_dashboard') }}" class="nav-btn"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}" class="nav-btn nav-btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}" class="nav-btn">Accedi</a></li>
+                        <li><a href="{{ url_for('auth.register_user') }}" class="nav-btn">Registrati</a></li>
+                        <li><a href="{{ url_for('auth.register_station') }}" class="station-btn nav-btn">Sei una stazione?</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>EV Connect</h3>
+                    <p>Soluzioni innovative per la mobilità elettrica</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contatti</h3>
+                    <p><i class="fas fa-envelope"></i> info@evconnect.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Seguici</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 EV Connect. Tutti i diritti riservati.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

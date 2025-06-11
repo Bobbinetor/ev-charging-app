@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Registrazione Utente - EV Connect{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Registrazione Utente</h2>
+            <p>Crea un account per accedere alla rete di ricarica</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.register_user') }}" class="auth-form">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                <label for="name">Nome</label>
+                {{ form.name(class="form-control", placeholder="Il tuo nome") }}
+                {% if form.name.errors %}
+                    <div class="error-message">
+                        {% for error in form.name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="surname">Cognome</label>
+                {{ form.surname(class="form-control", placeholder="Il tuo cognome") }}
+                {% if form.surname.errors %}
+                    <div class="error-message">
+                        {% for error in form.surname.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                {{ form.email(class="form-control", placeholder="La tua email") }}
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        {% for error in form.email.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                {{ form.password(class="form-control", placeholder="Crea una password") }}
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="password2">Conferma Password</label>
+                {{ form.password2(class="form-control", placeholder="Conferma la password") }}
+                {% if form.password2.errors %}
+                    <div class="error-message">
+                        {% for error in form.password2.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <div class="terms-conditions">
+                    {{ form.accept_terms() }}
+                    <label for="accept_terms">Accetto i <a href="{{ url_for('main.terms') }}">Termini e Condizioni</a> e la <a href="{{ url_for('main.privacy') }}">Privacy Policy</a></label>
+                </div>
+                {% if form.accept_terms.errors %}
+                    <div class="error-message">
+                        {% for error in form.accept_terms.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Hai già un account? <a href="{{ url_for('auth.login') }}">Accedi</a></p>
+        </div>
+    </div>
+    
+    <div class="auth-info">
+        <div class="auth-info-content">
+            <h3>Unisciti alla rete EV Connect</h3>
+            <p>Vantaggi esclusivi per i nostri utenti</p>
+            <ul>
+                <li><i class="fas fa-percent"></i> Tariffe preferenziali</li>
+                <li><i class="fas fa-clock"></i> Prenotazione stazioni</li>
+                <li><i class="fas fa-award"></i> Programma fedeltà con premi</li>
+                <li><i class="fas fa-route"></i> Pianificatore di viaggio ottimizzato</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

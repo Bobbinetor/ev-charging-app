@@ -1,0 +1,1062 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Stazione - Sustainable Mobility Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #e74c3c;
+        --accent-color: #f39c12;
+        --light-bg: #f9f9f9;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --card-padding: 24px;
+        --section-margin: 32px;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        background-color: #f5f7fa;
+    }
+    
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0;
+    }
+    
+    .dashboard-header {
+        padding: 24px var(--card-padding);
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        margin-bottom: 0;
+    }
+    
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .dashboard-welcome {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .dashboard-welcome p {
+        margin: 8px 0 0 0;
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    
+    .dashboard-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        padding: var(--card-padding);
+        background-color: var(--light-bg);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .card {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: var(--card-padding);
+        margin-bottom: 24px;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        font-size: 18px;
+        font-weight: 600;
+    }
+    
+    .section-title i {
+        margin-right: 12px;
+        color: var(--secondary-color);
+        font-size: 20px;
+    }
+    
+    .station-info {
+        margin-bottom: 24px;
+    }
+    
+    .station-info ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .station-info ul li {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+    }
+    
+    .station-info ul li:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .station-info ul li i {
+        color: var(--secondary-color);
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .station-info ul li strong {
+        width: 120px;
+        display: inline-block;
+        color: #555;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table th, .table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .table th {
+        background-color: #f9f9f9;
+        color: #555;
+        font-weight: 600;
+    }
+    
+    .table tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .status-online {
+        background-color: #e3f9e5;
+        color: #1e8e3e;
+    }
+    
+    .status-offline {
+        background-color: #feeef0;
+        color: #d62d49;
+    }
+    
+    .status-maintenance {
+        background-color: #fef6e0;
+        color: #b06000;
+    }
+    
+    .status-working {
+        background-color: #e3f9e5;
+        color: #1e8e3e;
+    }
+    
+    .status-not-working {
+        background-color: #feeef0;
+        color: #d62d49;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #c0392b;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 250px;
+    }
+    
+    .user-info-card {
+        margin-top: 20px;
+        transition: max-height 0.3s ease;
+        overflow: hidden;
+        max-height: 0;
+    }
+    .user-info-card.expanded {
+        max-height: 500px;
+    }
+    
+    /* Stili per form guidato aggiunta device */
+    .device-step {
+        margin-bottom: 20px;
+    }
+    
+    .step-title {
+        color: var(--primary-color);
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .step-description {
+        color: #666;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+    
+    .fuel-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .fuel-option {
+        padding: 20px;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: white;
+    }
+    
+    .fuel-option:hover {
+        border-color: var(--secondary-color);
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .fuel-option i {
+        font-size: 28px;
+        color: var(--secondary-color);
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .fuel-option span {
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--primary-color);
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .fuel-option small {
+        color: #666;
+        font-size: 12px;
+        display: block;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+    
+    .form-row .btn {
+        flex: 1;
+        max-width: 200px;
+    }
+    
+    .device-result-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        border-radius: 4px;
+        padding: 12px;
+        margin-top: 15px;
+    }
+    
+    .device-result-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        padding: 12px;
+        margin-top: 15px;
+    }
+    
+    @media (max-width: 992px) {
+        .dashboard-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .fuel-selection {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-row {
+            flex-direction: column;
+        }
+        
+        .form-row .btn {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <div>
+                <h1>Dashboard Stazione</h1>
+                <p>Benvenuto, {{ current_user.station.name }}</p>
+            </div>
+            <div>
+                <span id="current-date-time"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-content">
+        <div class="left-column">
+            <!-- Informazioni Stazione -->
+            <div class="card station-info">
+                <h2 class="section-title"><i class="fas fa-info-circle"></i>Informazioni Stazione</h2>
+                <ul>
+                    <li><i class="fas fa-charging-station"></i><strong>Nome:</strong> <span>{{ current_user.station.name }}</span></li>
+                    <li><i class="fas fa-leaf"></i><strong>Tipo:</strong> <span>
+                        {% if current_user.station.station_type == 'hybrid' %}🔄 Ibrida
+                        {% elif current_user.station.station_type == 'hydrogen' %}🔋 Idrogeno
+                        {% else %}⚡ Elettrica{% endif %}
+                    </span></li>
+                    <li><i class="fas fa-gas-pump"></i><strong>Carburanti:</strong> <span>
+                        {% if current_user.station.fuel_types %}
+                            {% for fuel in current_user.station.fuel_types %}
+                                {% if fuel == 'electric' %}⚡ Elettrico{% elif fuel == 'hydrogen' %}🔋 Idrogeno{% endif %}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}⚡ Elettrico{% endif %}
+                    </span></li>
+                    {% if current_user.station.station_type == 'hydrogen' or 'hydrogen' in (current_user.station.fuel_types or []) %}
+                    <li><i class="fas fa-flask"></i><strong>Capacità H2:</strong> <span>{{ current_user.station.hydrogen_storage_capacity or 'N/A' }} kg</span></li>
+                    <li><i class="fas fa-tachometer-alt"></i><strong>Pressione Max:</strong> <span>{{ current_user.station.max_dispensing_pressure or 'N/A' }} bar</span></li>
+                    {% endif %}
+                    <li><i class="fas fa-building"></i><strong>Azienda:</strong> <span>{{ current_user.station.company }}</span></li>
+                    <li><i class="fas fa-map-marker-alt"></i><strong>Indirizzo:</strong> <span>{{ current_user.station.address }}</span></li>
+                    <li><i class="fas fa-envelope"></i><strong>Email:</strong> <span>{{ current_user.station.email }}</span></li>
+                    <li><i class="fas fa-phone"></i><strong>Telefono:</strong> <span>{{ current_user.station.phone }}</span></li>
+                </ul>
+            </div>
+            
+            <!-- Aggiunta Device Guidata -->
+            <div class="card add-device">
+                <h2 class="section-title"><i class="fas fa-plus-circle"></i>Aggiungi Nuovo Device</h2>
+                
+                <!-- Passaggio 1: Tipo Carburante -->
+                <div id="step-1" class="device-step">
+                    <h3 class="step-title">📋 Passaggio 1: Seleziona Tipo Carburante</h3>
+                    <p class="step-description">Scegli il tipo di carburante per il nuovo device:</p>
+                    <div class="fuel-selection">
+                        {% if current_user.station.fuel_types %}
+                            {% for fuel in current_user.station.fuel_types %}
+                                <div class="fuel-option" data-fuel="{{ fuel }}">
+                                    {% if fuel == 'electric' %}
+                                        <i class="fas fa-bolt"></i>
+                                        <span>Elettrico</span>
+                                        <small>Ricarica per veicoli elettrici</small>
+                                    {% elif fuel == 'hydrogen' %}
+                                        <i class="fas fa-atom"></i>
+                                        <span>Idrogeno</span>
+                                        <small>Rifornimento H2 per veicoli fuel cell</small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Passaggio 2: Configurazione Elettrica -->
+                <div id="step-2-electric" class="device-step" style="display: none;">
+                    <h3 class="step-title">⚡ Passaggio 2: Configurazione Device Elettrico</h3>
+                    <form id="electric-device-form">
+                        <div class="form-group">
+                            <label for="electric-type">Tipo di Corrente</label>
+                            <select id="electric-type" name="power_type" class="form-control">
+                                <option value="">Seleziona tipo...</option>
+                                <option value="AC">AC (Corrente Alternata) - Ricarica lenta/normale</option>
+                                <option value="DC">DC (Corrente Continua) - Ricarica veloce</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="electric-power">Potenza Massima (kW)</label>
+                            <select id="electric-power" name="power_level" class="form-control">
+                                <option value="">Seleziona potenza...</option>
+                                <optgroup label="AC - Ricarica Lenta/Normale">
+                                    <option value="3.7">3.7 kW (16A monofase)</option>
+                                    <option value="7.4">7.4 kW (32A monofase)</option>
+                                    <option value="11">11 kW (16A trifase)</option>
+                                    <option value="22">22 kW (32A trifase)</option>
+                                </optgroup>
+                                <optgroup label="DC - Ricarica Veloce">
+                                    <option value="50">50 kW (DC Fast)</option>
+                                    <option value="100">100 kW (DC Fast)</option>
+                                    <option value="150">150 kW (DC Ultra Fast)</option>
+                                    <option value="250">250 kW (DC Ultra Fast)</option>
+                                    <option value="350">350 kW (DC Ultra Fast)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="electric-connector">Tipo Connettore</label>
+                            <select id="electric-connector" name="connector_type" class="form-control">
+                                <option value="">Seleziona connettore...</option>
+                                <option value="type2">Type 2 (Mennekes) - Standard europeo AC</option>
+                                <option value="ccs">CCS (Combined Charging System) - DC</option>
+                                <option value="chademo">CHAdeMO - DC (standard giapponese)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="electric-voltage">Tensione (V)</label>
+                            <input type="number" id="electric-voltage" name="voltage" class="form-control" placeholder="Es. 230V (AC) o 400V (DC)">
+                        </div>
+                        
+                        <div class="form-row">
+                            <button type="button" class="btn btn-secondary" onclick="goBackToStep1()">⬅️ Indietro</button>
+                            <button type="submit" class="btn btn-primary">✅ Aggiungi Device Elettrico</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Passaggio 2: Configurazione Idrogeno -->
+                <div id="step-2-hydrogen" class="device-step" style="display: none;">
+                    <h3 class="step-title">🔋 Passaggio 2: Configurazione Device Idrogeno</h3>
+                    <form id="hydrogen-device-form">
+                        <div class="form-group">
+                            <label for="hydrogen-pressure">Pressione di Erogazione (bar)</label>
+                            <select id="hydrogen-pressure" name="dispensing_pressure" class="form-control">
+                                <option value="">Seleziona pressione...</option>
+                                <option value="350">350 bar (Standard per autobus e veicoli commerciali)</option>
+                                <option value="700">700 bar (Standard per auto passeggeri)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hydrogen-flow">Flusso Massimo (kg/min)</label>
+                            <select id="hydrogen-flow" name="flow_rate" class="form-control">
+                                <option value="">Seleziona flusso...</option>
+                                <option value="0.5">0.5 kg/min (Erogazione lenta)</option>
+                                <option value="1.0">1.0 kg/min (Erogazione normale)</option>
+                                <option value="1.5">1.5 kg/min (Erogazione veloce)</option>
+                                <option value="2.0">2.0 kg/min (Erogazione molto veloce)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hydrogen-connector">Tipo Connettore</label>
+                            <select id="hydrogen-connector" name="connector_type" class="form-control">
+                                <option value="">Seleziona connettore...</option>
+                                <option value="h35">H35 (350 bar)</option>
+                                <option value="h70">H70 (700 bar)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hydrogen-purity">Purezza Idrogeno (%)</label>
+                            <input type="number" id="hydrogen-purity" name="purity_level" class="form-control" 
+                                   value="99.97" min="99.9" max="99.99" step="0.01" 
+                                   placeholder="Es. 99.97%">
+                        </div>
+                        
+                        <div class="form-row">
+                            <button type="button" class="btn btn-secondary" onclick="goBackToStep1()">⬅️ Indietro</button>
+                            <button type="submit" class="btn btn-primary">✅ Aggiungi Device Idrogeno</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="device-result" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="right-column">
+            <!-- Stato dei Devices -->
+            <div class="card devices-section">
+                <h2 class="section-title"><i class="fas fa-server"></i>Stato dei Devices</h2>
+                <table class="table" id="devices-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Specifiche</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="4" class="text-center">Caricamento...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Prenotazioni -->
+            <div class="card reservations-section">
+                <h2 class="section-title"><i class="fas fa-calendar-alt"></i>Prenotazioni</h2>
+                <table class="table" id="reservations-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Utente</th>
+                            <th>Data e Ora</th>
+                            <th>Durata</th>
+                            <th>Stato</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="text-center">Caricamento...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Scheda Utente Trust -->
+                <div class="card user-info-card" id="user-info-card" style="display: none; cursor: pointer;">
+                    <h2 class="section-title"><i class="fas fa-user"></i>Dettagli Utente</h2>
+                    <ul>
+                        <li><strong>ID:</strong> <span id="ui-user-id"></span></li>
+                        <li><strong>Nome:</strong> <span id="ui-user-name"></span></li>
+                        <li><strong>Email:</strong> <span id="ui-user-email"></span></li>
+                        <li><strong>Trust Score:</strong> <span id="ui-trust-score"></span></li>
+                    </ul>
+                </div>
+            </div>  <!-- end reservations-section -->
+            
+            <!-- Trust Records -->
+            <div class="card trust-records-section">
+                <h2 class="section-title"><i class="fas fa-shield-alt"></i>Trust Records</h2>
+                <div class="form-inline" style="margin-bottom: 15px;"> 
+                    <div class="form-group" style="flex-grow: 1; margin-right: 10px;">
+                        <input type="text" id="trust-user-filter" class="form-control" placeholder="Search User...">
+                    </div>
+                    <button type="button" id="trust-user-filter-btn" class="btn btn-primary">Search</button>
+                </div>
+                <table class="table" id="trust-records-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Prenotazione</th>
+                            <th>Utente</th>
+                            <th>Punteggio</th>
+                            <th>Data/Ora</th>
+                        </tr>
+                    </thead>
+                    <tbody><tr><td colspan="5" class="text-center">Caricamento...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aggiorna data e ora corrente
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('current-date-time').textContent = now.toLocaleDateString('it-IT', options);
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        
+        // Funzione per caricare i device della stazione
+        async function loadDevices() {
+            try {
+                const response = await fetch('/auth/api/station/{{ current_user.station_id }}/devices');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tableBody = document.querySelector('#devices-table tbody');
+                    
+                    // Aggiorna il contatore dei device per il naming automatico
+                    currentDeviceCount = data.devices.length;
+                    
+                    if (data.devices.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Nessun device registrato</td></tr>';
+                        return;
+                    }
+                    
+                    tableBody.innerHTML = '';
+                    
+                    data.devices.forEach(device => {
+                        const isWorking = device.status !== 'maintenance';
+                        const statusClass = isWorking ? 'status-working' : 'status-not-working';
+                        const statusText = isWorking ? 'Funzionante' : 'Non funzionante';
+                        
+                        // Determina le specifiche del dispositivo basate sul tipo carburante
+                        let typeInfo, powerInfo;
+                        if (device.fuel_type === 'hydrogen') {
+                            typeInfo = `🔋 H2 (${device.connector_type || 'H70'})`;
+                            powerInfo = `${device.dispensing_pressure || 'N/A'} bar<br><small>${device.flow_rate || 'N/A'} kg/min</small>`;
+                        } else {
+                            const connectorDisplay = device.connector_type ? device.connector_type.toUpperCase() : 'Type2';
+                            typeInfo = `⚡ ${device.power_type || 'AC'} (${connectorDisplay})`;
+                            powerInfo = `${device.power_level || 'N/A'} kW<br><small>${device.voltage || 'N/A'} V</small>`;
+                        }
+
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${device.identifier}</td>
+                                <td>${typeInfo}</td>
+                                <td>${powerInfo}</td>
+                                <td><span class="status ${statusClass}">${statusText}</span></td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    console.error('Errore nel caricamento dei devices:', data.error);
+                }
+            } catch (error) {
+                console.error('Errore nella richiesta:', error);
+            }
+        }
+        
+        // Funzione per caricare le prenotazioni
+        async function loadReservations() {
+            try {
+                const response = await fetch('/auth/api/station/bookings', { credentials: 'same-origin' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tableBody = document.querySelector('#reservations-table tbody');
+                    
+                    if (data.bookings.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Nessuna prenotazione</td></tr>';
+                        return;
+                    }
+                    
+                    tableBody.innerHTML = '';
+                    
+                    data.bookings.forEach(booking => {
+                        let statusClass = '';
+                        let statusText = booking.status;
+                        switch (booking.status) {
+                            case 'active': statusClass = 'status-online'; statusText = 'Attiva'; break;
+                            case 'completed': statusClass = 'status-maintenance'; statusText = 'Completata'; break;
+                            case 'no_show': statusClass = 'status-offline'; statusText = 'Utente non presente'; break;
+                        }
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${booking.id}</td>
+                                <td>${booking.user_name}</td>
+                                <td>${booking.start_time}</td>
+                                <td>${booking.duration} minuti</td>
+                                <td><span class="status ${statusClass}">${statusText}</span></td>
+                                <td>
+                                    <button type="button" class="btn btn-success btn-sm" data-action="success" data-booking-id="${booking.id}" title="Andata a buon termine"><i class="fas fa-check"></i></button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-action="no_show" data-booking-id="${booking.id}" title="Utente non presentato"><i class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    // Bind click handlers on action buttons
+                    tableBody.querySelectorAll('button[data-action]').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const action = btn.getAttribute('data-action');
+                            const bookingId = btn.getAttribute('data-booking-id');
+                            markBooking(bookingId, action);
+                        });
+                    });
+                } else {
+                    console.error('Errore nel caricamento delle prenotazioni:', data.error);
+                }
+            } catch (error) {
+                console.error('Errore nella richiesta:', error);
+            }
+        }
+        
+        // Funzione per caricare i trust records
+        async function loadTrustRecords(userNameFilter = '') {
+            try {
+                let url = '/auth/api/station/trust-records';
+                if (userNameFilter && userNameFilter.trim()) { // Ensure filter is not empty
+                    url += `?user_name_filter=${encodeURIComponent(userNameFilter.trim())}`;
+                }
+                const res = await fetch(url, { credentials: 'same-origin' });
+                const data = await res.json();
+                const tbody = document.querySelector('#trust-records-table tbody');
+                if (data.success) {
+                    if (data.records.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nessun record trovato</td></tr>';
+                    } else {
+                        tbody.innerHTML = '';
+                        data.records.forEach(record => {
+                            const row = tbody.insertRow();
+                            row.insertCell().textContent = record.id;
+                            row.insertCell().textContent = record.booking_id;
+                            row.insertCell().textContent = record.user_name;
+                            const scoreCell = row.insertCell();
+                            scoreCell.textContent = record.punteggio_utente_dopo_evento !== null && record.punteggio_utente_dopo_evento !== undefined ? record.punteggio_utente_dopo_evento : 'N/A';
+                            row.insertCell().textContent = record.timestamp;
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Errore caricamento trust records:', err);
+                document.querySelector('#trust-records-table tbody').innerHTML = '<tr><td colspan="5" class="text-center">Errore nel caricamento dei record.</td></tr>';
+            }
+        }
+
+        // Funzione per marcare esito prenotazione
+        async function markBooking(bookingId, result) {
+            try {
+                const response = await fetch(`/auth/api/station/bookings/${bookingId}/mark`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ result })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // Remove the booking row directly from the table instead of reloading the entire table
+                    const tableRow = document.querySelector(`button[data-booking-id="${bookingId}"]`).closest('tr');
+                    if (tableRow) {
+                        // Optional: add a fade-out effect before removing
+                        tableRow.style.transition = 'opacity 0.5s ease';
+                        tableRow.style.opacity = '0';
+                        
+                        // Remove the row after the fade effect
+                        setTimeout(() => {
+                            tableRow.remove();
+                            
+                            // If this was the last row, show "No reservations" message
+                            const tableBody = document.querySelector('#reservations-table tbody');
+                            if (tableBody.children.length === 0) {
+                                tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Nessuna prenotazione</td></tr>';
+                            }
+                        }, 500);
+                    }
+                    
+                    // Still update trust records to show the new record
+                    loadTrustRecords();
+                    
+                    // Optionally, show a temporary success message
+                    showNotification(`Prenotazione ${bookingId} ${result === 'success' ? 'completata' : 'marcata no-show'} con successo.`);
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Errore markBooking:', e);
+                alert('Si è verificato un errore durante l\'operazione.');
+            }
+        }
+        
+        // Helper function to show a temporary notification
+        function showNotification(message, type = 'success') {
+            // Create notification element if it doesn't exist
+            let notification = document.getElementById('notification');
+            if (!notification) {
+                notification = document.createElement('div');
+                notification.id = 'notification';
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.padding = '15px 20px';
+                notification.style.borderRadius = '5px';
+                notification.style.zIndex = '1000';
+                notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                notification.style.transition = 'opacity 0.5s ease';
+                document.body.appendChild(notification);
+            }
+            
+            // Set style based on type
+            if (type === 'success') {
+                notification.style.backgroundColor = '#4CAF50';
+                notification.style.color = 'white';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = '#f44336';
+                notification.style.color = 'white';
+            }
+            
+            // Set message and show
+            notification.textContent = message;
+            notification.style.opacity = '1';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+            }, 3000);
+        }
+        
+        // Variabili globali per il form guidato
+        let selectedFuelType = null;
+        let currentDeviceCount = 0;
+        
+        // Inizializza il form guidato
+        function initGuidedForm() {
+            // Aggiungi event listeners per la selezione del carburante
+            document.querySelectorAll('.fuel-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectedFuelType = this.getAttribute('data-fuel');
+                    showStep2(selectedFuelType);
+                });
+            });
+            
+            // Event listeners per i form
+            document.getElementById('electric-device-form').addEventListener('submit', handleElectricDeviceSubmit);
+            document.getElementById('hydrogen-device-form').addEventListener('submit', handleHydrogenDeviceSubmit);
+        }
+        
+        function showStep2(fuelType) {
+            // Nascondi step 1
+            document.getElementById('step-1').style.display = 'none';
+            
+            // Mostra step 2 appropriato
+            if (fuelType === 'electric') {
+                document.getElementById('step-2-electric').style.display = 'block';
+                document.getElementById('step-2-hydrogen').style.display = 'none';
+            } else if (fuelType === 'hydrogen') {
+                document.getElementById('step-2-hydrogen').style.display = 'block';
+                document.getElementById('step-2-electric').style.display = 'none';
+            }
+        }
+        
+        function goBackToStep1() {
+            document.getElementById('step-1').style.display = 'block';
+            document.getElementById('step-2-electric').style.display = 'none';
+            document.getElementById('step-2-hydrogen').style.display = 'none';
+            selectedFuelType = null;
+        }
+        
+        // Funzione per generare ID automatico del device
+        function generateDeviceId(fuelType, powerOrPressure) {
+            const stationName = "{{ current_user.station.name }}".replace(/\s+/g, '');
+            const deviceNumber = String(currentDeviceCount + 1).padStart(2, '0');
+            
+            if (fuelType === 'electric') {
+                return `${stationName}_EV_${powerOrPressure}kW_${deviceNumber}`;
+            } else {
+                return `${stationName}_H2_${powerOrPressure}bar_${deviceNumber}`;
+            }
+        }
+        
+        async function handleElectricDeviceSubmit(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            // Validazione
+            const powerType = formData.get('power_type');
+            const powerLevel = formData.get('power_level');
+            const connectorType = formData.get('connector_type');
+            const voltage = formData.get('voltage');
+            
+            if (!powerType || !powerLevel || !connectorType) {
+                showDeviceResult('Tutti i campi obbligatori devono essere compilati!', 'error');
+                return;
+            }
+            
+            // Genera ID automatico
+            const deviceId = generateDeviceId('electric', powerLevel);
+            
+            const deviceData = {
+                device_id: deviceId,
+                fuel_type: 'electric',
+                power_type: powerType,
+                power_level: parseFloat(powerLevel),
+                connector_type: connectorType,
+                voltage: voltage ? parseFloat(voltage) : null
+            };
+            
+            await submitDevice(deviceData, form);
+        }
+        
+        async function handleHydrogenDeviceSubmit(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            // Validazione
+            const dispensingPressure = formData.get('dispensing_pressure');
+            const flowRate = formData.get('flow_rate');
+            const connectorType = formData.get('connector_type');
+            const purityLevel = formData.get('purity_level');
+            
+            if (!dispensingPressure || !flowRate || !connectorType) {
+                showDeviceResult('Tutti i campi obbligatori devono essere compilati!', 'error');
+                return;
+            }
+            
+            // Genera ID automatico
+            const deviceId = generateDeviceId('hydrogen', dispensingPressure);
+            
+            const deviceData = {
+                device_id: deviceId,
+                fuel_type: 'hydrogen',
+                dispensing_pressure: parseInt(dispensingPressure),
+                flow_rate: parseFloat(flowRate),
+                connector_type: connectorType,
+                purity_level: purityLevel ? parseFloat(purityLevel) : 99.97
+            };
+            
+            await submitDevice(deviceData, form);
+        }
+        
+        async function submitDevice(deviceData, form) {
+            showDeviceResult('⏳ Aggiunta del device in corso...', 'info');
+            
+            try {
+                const response = await fetch('/auth/station/add_device', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(deviceData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showDeviceResult(`✅ ${data.message}\\nID Device: ${deviceData.device_id}`, 'success');
+                    form.reset();
+                    goBackToStep1();
+                    currentDeviceCount++;
+                    
+                    // Ricarica la lista dei devices
+                    loadDevices();
+                } else {
+                    showDeviceResult(`❌ Errore: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showDeviceResult(`❌ Errore nella richiesta: ${error.message}`, 'error');
+            }
+        }
+        
+        function showDeviceResult(message, type) {
+            const resultDiv = document.getElementById('device-result');
+            resultDiv.style.display = 'block';
+            
+            // Rimuovi classi precedenti
+            resultDiv.className = resultDiv.className.replace(/device-result-\\w+/g, '');
+            
+            if (type === 'success') {
+                resultDiv.className += ' device-result-success';
+            } else if (type === 'error') {
+                resultDiv.className += ' device-result-error';
+            }
+            
+            resultDiv.innerHTML = message.replace(/\\n/g, '<br>');
+            
+            // Auto-hide dopo successo
+            if (type === 'success') {
+                setTimeout(() => {
+                    resultDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Funzione per caricare le informazioni dell'utente
+        async function loadUserInfo(userId) {
+            try {
+                const response = await fetch(`/auth/api/users/${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('ui-user-id').textContent = data.user.id;
+                    document.getElementById('ui-user-name').textContent = data.user.name;
+                    document.getElementById('ui-user-email').textContent = data.user.email;
+                    document.getElementById('ui-trust-score').textContent = data.user.trust_score;
+                } else {
+                    console.error('Errore nel caricamento delle informazioni utente:', data.error);
+                }
+            } catch (error) {
+                console.error('Errore nella richiesta:', error);
+            }
+        }
+        
+        // Esponi le funzioni in window per gestire inline onclick
+        window.markBooking = markBooking;
+        window.goBackToStep1 = goBackToStep1;
+        // Carica i dati all'avvio
+        loadDevices();
+        loadReservations();
+        loadTrustRecords(); // Initial load without filter
+        initGuidedForm(); // Inizializza il form guidato
+
+        // Event listener for the user filter input and button
+        const userFilterInput = document.getElementById('trust-user-filter');
+        const userFilterButton = document.getElementById('trust-user-filter-btn');
+
+        function triggerSearch() {
+            loadTrustRecords(userFilterInput.value);
+        }
+
+        userFilterButton.addEventListener('click', function() {
+            triggerSearch(); // Trigger search immediately on button click
+        });
+        
+        // Allow Enter key to trigger search from input field
+        userFilterInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent form submission if it's part of a form
+                triggerSearch();
+            }
+        });
+    });
+</script>
+{% endblock %}

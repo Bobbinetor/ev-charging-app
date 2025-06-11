@@ -1,0 +1,1931 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Utente - Sustainable Mobility Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #2ecc71;
+        --light-bg: #f9f9f9;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --card-padding: 24px;
+        --section-margin: 32px;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        background-color: #f5f7fa;
+    }
+    
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0;
+    }
+    
+    .dashboard-header {
+        padding: 24px var(--card-padding);
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        margin-bottom: 0;
+    }
+    
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .dashboard-welcome {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .dashboard-welcome p {
+        margin: 8px 0 0 0;
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    
+    .dashboard-content {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 24px;
+        padding: var(--card-padding);
+        background-color: var(--light-bg);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .dashboard-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+    
+    .card {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: var(--card-padding);
+        height: 100%;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        font-size: 18px;
+        font-weight: 600;
+    }
+    
+    .section-title i {
+        margin-right: 12px;
+        color: var(--secondary-color);
+        font-size: 20px;
+    }
+    
+    .profile-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .profile-section ul li {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+    }
+    
+    .profile-section ul li:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .profile-section ul li i {
+        color: var(--secondary-color);
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .profile-section ul li strong {
+        width: 80px;
+        display: inline-block;
+        color: #555;
+    }
+    
+    #stations-map {
+        height: 500px;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #444;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 15px;
+        transition: border-color 0.2s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    }
+    
+    .input-with-icon {
+        position: relative;
+    }
+    
+    .input-with-icon i {
+        position: absolute;
+        left: 12px;
+        top: 14px;
+        color: #aaa;
+    }
+    
+    .input-with-icon input {
+        padding-left: 40px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #2980b9;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-block {
+        display: block;
+        width: 100%;
+    }
+    
+    .station-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        background-color: rgba(52, 152, 219, 0.05);
+        border-radius: 6px;
+        padding: 16px;
+        text-align: center;
+    }
+    
+    .stat-card h3 {
+        margin: 0 0 6px 0;
+        font-size: 14px;
+        color: #555;
+        font-weight: 500;
+    }
+    
+    .stat-card p {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--secondary-color);
+    }
+    
+    /* Styling for the bookings list */
+    .bookings-list {
+        margin-top: 20px;
+    }
+    
+    .booking-card {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-left: 4px solid var(--secondary-color);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .booking-card h3 {
+        margin-top: 0;
+        font-size: 16px;
+        color: var(--primary-color);
+    }
+    
+    .booking-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    
+    .booking-detail {
+        display: flex;
+        align-items: center;
+    }
+    
+    .booking-detail i {
+        color: var(--secondary-color);
+        margin-right: 8px;
+        width: 16px;
+    }
+    
+    .booking-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--secondary-color);
+        color: var(--secondary-color);
+    }
+    
+    .btn-outline:hover {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .btn-danger {
+        background-color: #e74c3c;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+    
+    .no-bookings {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #777;
+    }
+    
+    @media (max-width: 992px) {
+        .dashboard-content {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Stile per i campi quando una stazione è selezionata */
+    .selected-station {
+        border-color: var(--accent-color) !important;
+        background-color: rgba(46, 204, 113, 0.05) !important;
+        box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.15) !important;
+    }
+    
+    /* Stile per step progressivi della prenotazione */
+    .booking-steps {
+        display: flex;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .booking-step {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-right: 1px solid #e9ecef;
+        position: relative;
+    }
+    
+    .booking-step:last-child {
+        border-right: none;
+    }
+    
+    .booking-step.active {
+        background-color: var(--secondary-color);
+        color: white;
+        position: relative;
+    }
+    
+    .booking-step.active::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        bottom: -3px;
+        left: 0;
+        background-color: var(--secondary-color);
+    }
+    
+    .booking-step.completed {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    
+    .booking-step::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        border-left: 10px solid #f8f9fa;
+        z-index: 1;
+    }
+    
+    .booking-step.active::after {
+        border-left-color: var(--secondary-color);
+    }
+    
+    .booking-step.completed::after {
+        border-left-color: var(--accent-color);
+    }
+    
+    .booking-step:last-child::after {
+        display: none;
+    }
+    
+    .helper-text {
+        display: block;
+        margin-top: 5px;
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .alert-info {
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+    }
+    
+    .alert-warning {
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+    }
+    
+    /* Improve marker selection styling */
+    .selected-marker {
+        filter: hue-rotate(120deg) brightness(1.2) !important;
+        transform: scale(1.2) !important;
+        z-index: 1000 !important;
+    }
+    
+    /* Improve date picker styling */
+    .flatpickr-calendar {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        border-radius: 8px !important;
+    }
+    
+    .flatpickr-day.selected {
+        background-color: var(--secondary-color) !important;
+        border-color: var(--secondary-color) !important;
+    }
+    
+    /* Station selection visual feedback */
+    .station-selection-feedback {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        background-color: rgba(46, 204, 113, 0.1);
+        border-left: 4px solid var(--accent-color);
+        display: none;
+    }
+    
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000;
+    }
+    .modal-content {
+      background: #fff; border-radius: 8px; padding: 20px; max-width: 500px; width: 90%; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .modal-content .close {
+      position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 20px;
+    }
+    .modal-footer { text-align: right; margin-top: 15px; }
+    
+    /* Fuel selection styles */
+    .fuel-selection-container {
+        display: flex;
+        gap: 15px;
+        margin-top: 8px;
+    }
+    
+    .fuel-option {
+        flex: 1;
+        position: relative;
+    }
+    
+    .fuel-option input[type="radio"] {
+        display: none;
+    }
+    
+    .fuel-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 15px 10px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    .fuel-label:hover {
+        border-color: var(--secondary-color);
+        background-color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .fuel-option input[type="radio"]:checked + .fuel-label {
+        border-color: var(--secondary-color);
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+    }
+    
+    .fuel-label i {
+        font-size: 24px;
+        color: var(--secondary-color);
+    }
+    
+    .fuel-option input[type="radio"]:checked + .fuel-label i {
+        color: var(--secondary-color);
+        animation: pulse 0.5s ease-in-out;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Tech specs sections */
+    #electric-specs, #hydrogen-specs {
+        border-left: 4px solid var(--secondary-color);
+        padding-left: 15px;
+        margin-left: 5px;
+        background-color: rgba(52, 152, 219, 0.02);
+        border-radius: 0 4px 4px 0;
+    }
+    
+    #hydrogen-specs {
+        border-left-color: #27ae60;
+        background-color: rgba(39, 174, 96, 0.02);
+    }
+    
+    /* Enhanced form styling */
+    /* Dropdown arrow icon only for selects that require user selection */
+    #duration,
+    #hydrogen-pressure,
+    #hydrogen-flow {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+    
+    /* Professional transitions */
+    .form-group {
+        transition: all 0.3s ease;
+    }
+    
+    .form-group:hover {
+        transform: translateX(2px);
+    }
+    
+    /* Filters container styling */
+    .filters-container {
+        background-color: rgba(52, 152, 219, 0.02);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .filters-container .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .filters-container .form-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .filters-container label {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    .filters-container .fuel-label {
+        font-size: 13px;
+    }
+    
+    .filters-container .form-control {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    .filters-container h3 {
+        border-bottom: 2px solid var(--secondary-color);
+        padding-bottom: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <div>
+                <h1>Dashboard Utente</h1>
+                <p>Benvenuto, {{ current_user.name }}!</p>
+            </div>
+            <div>
+                <span id="current-date-time"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-content">
+        <div class="dashboard-sections">
+            <!-- Sezione Profilo Utente -->
+            <div class="card profile-section">
+                <h2 class="section-title"><i class="fas fa-user-circle"></i>Il tuo profilo</h2>
+                <ul>
+                    <li><i class="fas fa-user"></i><strong>Nome:</strong> <span>{{ current_user.name }}</span></li>
+                    <li><i class="fas fa-user"></i><strong>Cognome: </strong> <span>{{ current_user.surname }}</span></li>
+                    <li><i class="fas fa-envelope"></i><strong>Email:</strong> <span>{{ current_user.email }}</span></li>
+                </ul>
+            </div>
+            
+            <!-- Prenotazione Rifornimento -->
+            <div class="card booking-section">
+                <h2 class="section-title"><i class="fas fa-calendar-check"></i>Prenota rifornimento</h2>
+                
+                <!-- Passi di prenotazione -->
+                <div class="booking-steps">
+                    <div class="booking-step active" id="step-station">
+                        <i class="fas fa-charging-station"></i> 1. Stazione
+                    </div>
+                    <div class="booking-step" id="step-datetime">
+                        <i class="fas fa-clock"></i> 2. Data/Ora
+                    </div>
+                    <div class="booking-step" id="step-confirm">
+                        <i class="fas fa-check-circle"></i> 3. Conferma
+                    </div>
+                </div>
+
+                <form id="booking-form" class="booking-form">
+                    <div class="form-group">
+                        <label for="station-id">Stazione Selezionata <span style="color: red">*</span></label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-charging-station"></i>
+                            <input type="text" id="station-id" name="station_id" class="form-control" 
+                                placeholder="Nessuna stazione selezionata" readonly>
+                        </div>
+                        <div id="station-selection-instructions" class="alert alert-info" style="margin-top: 10px;">
+                            <strong><i class="fas fa-hand-pointer"></i> Come selezionare una stazione:</strong>
+                            <ol style="margin-top: 8px; margin-bottom: 0; padding-left: 20px;">
+                                <li>Usa i filtri in alto a destra per visualizzare le stazioni desiderate</li>
+                                <li>Guarda la mappa a destra → i marker colorati mostrano le stazioni</li>
+                                <li><strong>Clicca su un marker</strong> per vedere i dettagli</li>
+                                <li><strong>Premi "Seleziona questa stazione"</strong> nel popup</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time-slot">Data e Ora di Inizio <span style="color: red">*</span></label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-clock"></i>
+                            <input type="text" id="time-slot" name="time_slot" class="form-control" placeholder="Clicca qui per scegliere data e ora">
+                        </div>
+                        <small class="helper-text">
+                            <i class="fas fa-info-circle"></i> La data e ora selezionate determineranno quali stazioni sono disponibili (verde = disponibile, rosso = non disponibile)
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duration">Durata del Rifornimento <span style="color: red">*</span></label>
+                        <div class="input-with-icon">
+                            <!-- icon removed for cleaner dropdown -->
+                            <select id="duration" name="duration" class="form-control">
+                                <option value="5">5 minuti</option>
+                                <option value="10">10 minuti</option>
+                                <option value="15">15 minuti</option>
+                                <option value="20">20 minuti</option>
+                                <option value="25">25 minuti</option>
+                                <option value="30" selected>30 minuti</option>
+                                <option value="45">45 minuti</option>
+                                <option value="60">60 minuti</option>
+                            </select>
+                        </div>
+                        <small class="helper-text" id="duration-hint">
+                            <i class="fas fa-info-circle"></i> <span id="duration-text">Elettrico: 5-60 min, Idrogeno: 3-10 min</span>
+                        </small>
+                    </div>
+                    
+                    <div class="booking-actions" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button type="button" id="check-availability-btn" class="btn btn-outline" style="flex: 1;">
+                            <i class="fas fa-search"></i> Verifica disponibilità
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            <i class="fas fa-bolt"></i> Prenota
+                        </button>
+                    </div>
+                </form>
+                <div id="booking-result" class="mt-3" style="display: none;"></div>
+            </div>
+            
+            <!-- Le Mie Prenotazioni -->
+            <div class="card my-bookings-section">
+                <h2 class="section-title"><i class="fas fa-list-alt"></i>Le mie prenotazioni</h2>
+                <div id="bookings-list" class="bookings-list">
+                    <div id="bookings-loading">
+                        <p class="text-center"><i class="fas fa-spinner fa-spin"></i> Caricamento prenotazioni...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mappa delle Stazioni -->
+        <div class="card stations-map-section">
+            <h2 class="section-title"><i class="fas fa-map-marked-alt"></i>Stazioni mobilità sostenibile</h2>
+            
+            <!-- Ricerca per città -->
+            <div class="search-container">
+                <div class="form-group">
+                    <label for="city-search">Cerca stazioni per città</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="city-search" class="form-control" placeholder="Inserisci nome città">
+                        <button id="search-button" class="btn btn-primary" style="margin-top: 10px;">Cerca</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filtri per visualizzazione stazioni -->
+            <div class="filters-container" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--primary-color);">
+                    <i class="fas fa-filter"></i> Filtri visualizzazione
+                </h3>
+                
+                <!-- Selezione Tipo di Carburante -->
+                <div class="form-group">
+                    <label for="fuel-type">Tipo di Carburante</label>
+                    <div class="fuel-selection-container" style="display: flex; gap: 10px; margin-top: 8px;">
+                        <div class="fuel-option" data-fuel="electric">
+                            <input type="radio" id="fuel-electric" name="fuel_type" value="electric" checked>
+                            <label for="fuel-electric" class="fuel-label" style="padding: 10px 8px;">
+                                <i class="fas fa-bolt"></i>
+                                <span>Elettrico</span>
+                            </label>
+                        </div>
+                        <div class="fuel-option" data-fuel="hydrogen">
+                            <input type="radio" id="fuel-hydrogen" name="fuel_type" value="hydrogen">
+                            <label for="fuel-hydrogen" class="fuel-label" style="padding: 10px 8px;">
+                                <i class="fas fa-atom"></i>
+                                <span>Idrogeno</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Specifiche Tecniche Elettrico -->
+                <div class="form-group" id="electric-specs">
+                    <label for="electric-connector">Connettore Elettrico</label>
+                    <select id="electric-connector" name="electric_connector" class="form-control" style="margin-bottom: 10px;">
+                        <option value="">Qualsiasi connettore</option>
+                        <option value="type2">Type 2 (AC - Standard Europeo)</option>
+                        <option value="ccs">CCS (DC - Combined Charging)</option>
+                        <option value="chademo">CHAdeMO (DC - Standard Giapponese)</option>
+                    </select>
+                    
+                    <label for="electric-power">Potenza Minima</label>
+                    <select id="electric-power" name="electric_power" class="form-control">
+                        <option value="">Qualsiasi potenza</option>
+                        <option value="7">7 kW (Ricarica Lenta)</option>
+                        <option value="22">22 kW (Ricarica Accelerata)</option>
+                        <option value="50">50 kW (Ricarica Rapida)</option>
+                        <option value="150">150 kW (Ricarica Ultra-Rapida)</option>
+                    </select>
+                </div>
+                
+                <!-- Specifiche Tecniche Idrogeno -->
+                <div class="form-group" id="hydrogen-specs" style="display: none;">
+                    <label for="hydrogen-pressure">Pressione Idrogeno</label>
+                    <select id="hydrogen-pressure" name="hydrogen_pressure" class="form-control" style="margin-bottom: 10px;">
+                        <option value="">Qualsiasi pressione</option>
+                        <option value="350">350 bar (H35 - Auto leggere)</option>
+                        <option value="700">700 bar (H70 - Auto, Bus, Camion)</option>
+                    </select>
+                    
+                    <label for="hydrogen-flow">Flusso Minimo</label>
+                    <select id="hydrogen-flow" name="hydrogen_flow" class="form-control">
+                        <option value="">Qualsiasi flusso</option>
+                        <option value="1">1 kg/min (Standard)</option>
+                        <option value="1.5">1.5 kg/min (Veloce)</option>
+                        <option value="2">2 kg/min (Ultra-Veloce)</option>
+                    </select>
+                </div>
+                
+                <small class="helper-text" style="display: block; margin-top: 10px;">
+                    <i class="fas fa-info-circle"></i> I filtri si aggiornano automaticamente con i dati reali disponibili nel sistema
+                </small>
+            </div>
+            
+            <div id="stations-map"></div>
+            <div id="map-loading" class="text-center py-3" style="display: none;">
+                <p><i class="fas fa-spinner fa-spin"></i> Caricamento della mappa...</p>
+            </div>
+            <div id="no-results" class="text-center py-3" style="display: none;">
+                <p><i class="fas fa-info-circle"></i> Nessuna stazione trovata in questa zona.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal per dettagli prenotazione -->
+<div id="booking-modal-overlay" class="modal-overlay">
+  <div class="modal-content">
+    <span id="modal-close-x" class="close">&times;</span>
+    <div id="booking-modal-body"></div>
+    <div class="modal-footer">
+      <button id="modal-cancel-btn" class="btn btn-danger">Cancella prenotazione</button>
+      <button id="modal-close-btn" class="btn btn-outline">Chiudi</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
+<script>
+// Modifiche per assicurare il caricamento delle stazioni al caricamento della pagina
+// Tutto il codice JS principale è qui racchiuso
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Aggiorna data e ora corrente
+    function updateDateTime() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        document.getElementById('current-date-time').textContent = now.toLocaleDateString('it-IT', options);
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+    
+    // Elementi DOM
+    const mapLoading = document.getElementById('map-loading');
+    const noResults = document.getElementById('no-results');
+    const searchButton = document.getElementById('search-button');
+    const citySearch = document.getElementById('city-search');
+    const checkAvailabilityBtn = document.getElementById('check-availability-btn');
+    const stationIdInput = document.getElementById('station-id');
+    const timeSlotInput = document.getElementById('time-slot');
+    const durationSelect = document.getElementById('duration');
+    const bookingResult = document.getElementById('booking-result');
+    const bookButton = document.querySelector('#booking-form button[type="submit"]');
+    
+    // Personalizzazioni del bottone prenotazione
+    bookButton.style.transition = 'all 0.3s';
+    bookButton.style.opacity = '0.7'; // Pulsante leggermente trasparente per default
+    
+    const stationFeedback = document.createElement('div');
+    stationFeedback.className = 'station-selection-feedback';
+    stationIdInput.parentNode.appendChild(stationFeedback);
+    
+    // Tracking selected marker and station
+    let selectedMarker = null;
+    let selectedStationId = null;
+    
+    // Variabile per stato disponibilità
+    let lastAvailability = null;
+    
+    // Elementi per la selezione del carburante
+    const fuelElectric = document.getElementById('fuel-electric');
+    const fuelHydrogen = document.getElementById('fuel-hydrogen');
+    const electricSpecs = document.getElementById('electric-specs');
+    const hydrogenSpecs = document.getElementById('hydrogen-specs');
+    const durationText = document.getElementById('duration-text');
+    
+    // Gestione cambio tipo carburante
+    function updateFuelTypeInterface() {
+        const selectedFuel = getSelectedFuelType();
+        
+        if (selectedFuel === 'electric') {
+            electricSpecs.style.display = 'block';
+            hydrogenSpecs.style.display = 'none';
+            durationText.textContent = 'Ricarica elettrica: 5-60 minuti (AC: 30-60 min, DC: 5-30 min)';
+            
+            // Aggiorna opzioni durata per elettrico
+            durationSelect.innerHTML = `
+                <option value="5">5 minuti</option>
+                <option value="10">10 minuti</option>
+                <option value="15">15 minuti</option>
+                <option value="20">20 minuti</option>
+                <option value="25">25 minuti</option>
+                <option value="30" selected>30 minuti</option>
+                <option value="45">45 minuti</option>
+                <option value="60">60 minuti</option>
+            `;
+        } else if (selectedFuel === 'hydrogen') {
+            electricSpecs.style.display = 'none';
+            hydrogenSpecs.style.display = 'block';
+            durationText.textContent = 'Rifornimento idrogeno: 3-10 minuti (standard: 3-5 min)';
+            
+            // Aggiorna opzioni durata per idrogeno
+            durationSelect.innerHTML = `
+                <option value="3">3 minuti</option>
+                <option value="4">4 minuti</option>
+                <option value="5" selected>5 minuti</option>
+                <option value="7">7 minuti</option>
+                <option value="10">10 minuti</option>
+            `;
+        }
+        
+        // Reset selezione stazione quando cambia carburante
+        clearStationSelection();
+        
+        // Aggiorna le opzioni disponibili per il tipo di carburante selezionato
+        updateAvailableSpecs();
+        
+        // Aggiorna mappa con filtri
+        if (citySearch.value || document.getElementById('time-slot').value) {
+            fetchStations(citySearch.value.trim());
+        }
+    }
+    
+    // Funzione per aggiornare le opzioni disponibili basate sui dati reali
+    async function updateAvailableSpecs() {
+        const selectedFuel = getSelectedFuelType();
+        const city = citySearch.value.trim();
+        
+        try {
+            const response = await fetch(`/auth/api/specs/available?fuel_type=${selectedFuel}&city=${encodeURIComponent(city)}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                if (selectedFuel === 'electric') {
+                    updateElectricOptions(data.electric_specs);
+                } else if (selectedFuel === 'hydrogen') {
+                    updateHydrogenOptions(data.hydrogen_specs);
+                }
+            }
+        } catch (error) {
+            console.error('Errore nel caricamento delle specifiche disponibili:', error);
+            // Fallback alle opzioni statiche
+            loadDefaultOptions(selectedFuel);
+        }
+    }
+    
+    // Helper functions per ottenere i valori selezionati nei filtri
+    function getSelectedFuelType() {
+        return document.querySelector('input[name="fuel_type"]:checked').value;
+    }
+    
+    function getSelectedConnectorType() {
+        const fuelType = getSelectedFuelType();
+        if (fuelType === 'electric') {
+            return document.getElementById('electric-connector').value;
+        } else if (fuelType === 'hydrogen') {
+            const pressure = document.getElementById('hydrogen-pressure').value;
+            return pressure ? pressure : '';
+        }
+        return '';
+    }
+    
+    // Aggiorna le opzioni per dispositivi elettrici
+    function updateElectricOptions(specs) {
+        const connectorSelect = document.getElementById('electric-connector');
+        const powerSelect = document.getElementById('electric-power');
+        
+        // Salva le selezioni correnti
+        const currentConnector = connectorSelect.value;
+        const currentPower = powerSelect.value;
+        
+        // Aggiorna connettori
+        connectorSelect.innerHTML = '<option value="">Qualsiasi connettore</option>';
+        specs.connectors.forEach(connector => {
+            const option = document.createElement('option');
+            option.value = connector.value;
+            option.textContent = connector.label;
+            connectorSelect.appendChild(option);
+        });
+        
+        // Aggiorna potenze
+        powerSelect.innerHTML = '<option value="">Qualsiasi potenza</option>';
+        specs.power_levels.forEach(power => {
+            const option = document.createElement('option');
+            option.value = power;
+            option.textContent = `${power} kW${getPowerTypeLabel(power)}`;
+            powerSelect.appendChild(option);
+        });
+        
+        // Ripristina le selezioni se ancora valide
+        if (connectorSelect.querySelector(`option[value="${currentConnector}"]`)) {
+            connectorSelect.value = currentConnector;
+        }
+        if (powerSelect.querySelector(`option[value="${currentPower}"]`)) {
+            powerSelect.value = currentPower;
+        }
+    }
+    
+    // Aggiorna le opzioni per dispositivi idrogeno
+    function updateHydrogenOptions(specs) {
+        const pressureSelect = document.getElementById('hydrogen-pressure');
+        const flowSelect = document.getElementById('hydrogen-flow');
+        
+        // Salva le selezioni correnti
+        const currentPressure = pressureSelect.value;
+        const currentFlow = flowSelect.value;
+        
+        // Aggiorna pressioni
+        pressureSelect.innerHTML = '<option value="">Qualsiasi pressione</option>';
+        specs.pressures.forEach(pressure => {
+            const option = document.createElement('option');
+            option.value = pressure;
+            option.textContent = `${pressure} bar (${pressure === 350 ? 'H35 - Auto leggere' : 'H70 - Auto, Bus, Camion'})`;
+            pressureSelect.appendChild(option);
+        });
+        
+        // Aggiorna flussi
+        flowSelect.innerHTML = '<option value="">Qualsiasi flusso</option>';
+        specs.flow_rates.forEach(flow => {
+            const option = document.createElement('option');
+            option.value = flow;
+            option.textContent = `${flow} kg/min${getFlowTypeLabel(flow)}`;
+            flowSelect.appendChild(option);
+        });
+        
+        // Ripristina le selezioni se ancora valide
+        if (pressureSelect.querySelector(`option[value="${currentPressure}"]`)) {
+            pressureSelect.value = currentPressure;
+        }
+        if (flowSelect.querySelector(`option[value="${currentFlow}"]`)) {
+            flowSelect.value = currentFlow;
+        }
+    }
+    
+    // Helper per etichette di potenza
+    function getPowerTypeLabel(power) {
+        if (power <= 22) return ' (AC - Ricarica Normale)';
+        if (power <= 50) return ' (DC - Ricarica Rapida)';
+        if (power <= 150) return ' (DC - Ricarica Ultra-Rapida)';
+        return ' (DC - Ricarica Ultra-Veloce)';
+    }
+    
+    // Helper per etichette di flusso
+    function getFlowTypeLabel(flow) {
+        if (flow <= 1) return ' (Standard)';
+        if (flow <= 1.5) return ' (Veloce)';
+        return ' (Ultra-Veloce)';
+    }
+    
+    // Carica opzioni statiche di fallback
+    function loadDefaultOptions(fuelType) {
+        if (fuelType === 'electric') {
+            updateElectricOptions({
+                connectors: [
+                    {value: 'type2', label: 'Type 2 (AC - Standard Europeo)'},
+                    {value: 'ccs', label: 'CCS (DC - Combined Charging)'},
+                    {value: 'chademo', label: 'CHAdeMO (DC - Standard Giapponese)'}
+                ],
+                power_levels: [7.4, 11, 22, 50, 100, 150, 300, 350]
+            });
+        } else if (fuelType === 'hydrogen') {
+            updateHydrogenOptions({
+                pressures: [350, 700],
+                flow_rates: [1.0, 1.5, 2.0, 2.5]
+            });
+        }
+    }
+    
+    // Funzione di debounce per limitare le chiamate API
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Event listeners per il cambio carburante
+    fuelElectric.addEventListener('change', updateFuelTypeInterface);
+    fuelHydrogen.addEventListener('change', updateFuelTypeInterface);
+    
+    // Event listeners per i filtri tecnici
+    document.getElementById('electric-connector').addEventListener('change', function() {
+        if (fuelElectric.checked) {
+            fetchStations(citySearch.value.trim());
+        }
+    });
+    
+    document.getElementById('electric-power').addEventListener('change', function() {
+        if (fuelElectric.checked) {
+            fetchStations(citySearch.value.trim());
+        }
+    });
+    
+    document.getElementById('hydrogen-pressure').addEventListener('change', function() {
+        if (fuelHydrogen.checked) {
+            fetchStations(citySearch.value.trim());
+        }
+    });
+    
+    document.getElementById('hydrogen-flow').addEventListener('change', function() {
+        if (fuelHydrogen.checked) {
+            fetchStations(citySearch.value.trim());
+        }
+    });
+    
+    // Event listener per la ricerca per città - aggiorna le opzioni disponibili
+    citySearch.addEventListener('input', debounce(function() {
+        updateAvailableSpecs();
+    }, 500));
+    
+    // Inizializzazione interfaccia carburante
+    updateFuelTypeInterface();
+    
+    // Carica le specifiche disponibili all'avvio
+    setTimeout(() => {
+        updateAvailableSpecs();
+    }, 500);
+    
+    // Inizializzazione di flatpickr (datepicker)
+    flatpickr("#time-slot", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        locale: "it",
+        minDate: "today",
+        minuteIncrement: 5
+    });
+    // Rendi il campo readonly per evitare input manuale
+    document.getElementById('time-slot').setAttribute('readonly', true);
+
+    // Funzione per validare e riformattare la data/ora per il backend
+    function getValidatedTimeSlot() {
+        const val = timeSlotInput.value.trim();
+        // Regex per 'YYYY-MM-DD HH:MM'
+        const pattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+        if (pattern.test(val)) {
+            return val;
+        }
+        // Prova a riformattare se Flatpickr restituisce altro formato (es. con 'T')
+        let reformatted = val.replace('T', ' ').slice(0, 16);
+        if (pattern.test(reformatted)) {
+            return reformatted;
+        }
+        return null;
+    }
+    
+    // Inizializzazione della mappa
+    console.log('Inizializzazione della mappa...');
+    let map;
+    let markers = [];
+    
+    try {
+        // Visualizza il loader della mappa
+        if (mapLoading) mapLoading.style.display = 'block';
+        
+        map = L.map('stations-map').setView([41.9028, 12.4964], 6); // Vista dell'Italia
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+        
+        // Aggiungi controllo per la geolocalizzazione (se disponibile)
+        if (L.control.locate) {
+            L.control.locate({
+                position: 'topleft',
+                strings: {
+                    title: "Mostra la mia posizione"
+                },
+                locateOptions: {
+                    enableHighAccuracy: true
+                }
+            }).addTo(map);
+        }
+        
+        console.log('Mappa inizializzata correttamente.');
+
+        // Carica tutte le stazioni all'avvio - importante! Chiamiamo con parametro vuoto
+        // per caricare tutte le stazioni
+        setTimeout(() => {
+            fetchStations('');
+        }, 100); // Un piccolo ritardo per assicurarsi che la mappa sia completamente caricata
+        
+    } catch (error) {
+        console.error('Errore durante l\'inizializzazione della mappa:', error);
+        if (mapLoading) {
+            mapLoading.innerHTML = '<p style="color: red;"><i class="fas fa-exclamation-triangle"></i> Errore nel caricamento della mappa</p>';
+        }
+    }
+    
+    // Carica le prenotazioni dell'utente
+    fetchBookings();
+    
+    // Funzione per recuperare le prenotazioni dell'utente
+    async function fetchBookings() {
+        const bookingsList = document.getElementById('bookings-list');
+        
+        try {
+            const response = await fetch('/auth/user/bookings', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Errore nel recupero delle prenotazioni');
+            }
+            
+            const data = await response.json();
+            
+            window.bookings = data.bookings;
+            
+            if (data.success && data.bookings.length > 0) {
+                let bookingsHTML = '';
+                
+                data.bookings.forEach(booking => {
+                    const startDate = new Date(booking.scheduled_start);
+                    const endDate = new Date(booking.scheduled_end);
+                    
+                    // Formatta le date in italiano
+                    const startFormatted = startDate.toLocaleString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const endFormatted = endDate.toLocaleString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    // Determina lo stato in italiano e il colore
+                    let statusText, statusColor;
+                    switch(booking.status) {
+                        case 'reserved':
+                            statusText = 'Prenotato';
+                            statusColor = '#3498db';
+                            break;
+                        case 'active':
+                            statusText = 'In corso';
+                            statusColor = '#2ecc71';
+                            break;
+                        case 'completed':
+                            statusText = 'Completato';
+                            statusColor = '#95a5a6';
+                            break;
+                        case 'cancelled':
+                            statusText = 'Annullato';
+                            statusColor = '#e74c3c';
+                            break;
+                        default:
+                            statusText = booking.status;
+                            statusColor = '#7f8c8d';
+                    }
+                    
+                    // Calcola se è possibile annullare (solo se è prenotato e non ancora iniziato)
+                    const canCancel = booking.status === 'reserved';
+                    
+                    bookingsHTML += `
+                        <div class="booking-card" style="border-left-color: ${statusColor}">
+                            <h3>Prenotazione #${booking.id} - ${statusText}</h3>
+                            <div class="booking-details">
+                                <div class="booking-detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Stazione: ${booking.station_name || booking.station_id}</span>
+                                </div>
+                                <div class="booking-detail">
+                                    <i class="fas fa-plug"></i>
+                                    <span>Dispositivo: ${booking.charging_point_name || booking.charging_point_id}</span>
+                                </div>
+                                <div class="booking-detail">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Inizio: ${startFormatted}</span>
+                                </div>
+                                <div class="booking-detail">
+                                    <i class="fas fa-hourglass-end"></i>
+                                    <span>Fine: ${endFormatted}</span>
+                                </div>
+                            </div>
+                            <div class="booking-actions">
+                                <button class="btn btn-sm btn-outline" onclick="viewBookingDetails(${booking.id})">
+                                    <i class="fas fa-info-circle"></i> Dettagli
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                bookingsList.innerHTML = bookingsHTML;
+            } else {
+                bookingsList.innerHTML = `
+                    <div class="no-bookings">
+                        <p><i class="fas fa-calendar-times"></i> Non hai prenotazioni attive.</p>
+                        <p>Usa il modulo di prenotazione per programmare una ricarica.</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Errore durante il recupero delle prenotazioni:', error);
+            bookingsList.innerHTML = `
+                <div class="no-bookings" style="color: #e74c3c;">
+                    <p><i class="fas fa-exclamation-triangle"></i> Errore nel caricamento delle prenotazioni.</p>
+                    <p>Riprova più tardi o contatta l'assistenza.</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Funzione per recuperare le stazioni dal database
+    async function fetchStations(city) {
+        // Mostra l'indicatore di caricamento
+        if (mapLoading) mapLoading.style.display = 'block';
+        if (noResults) noResults.style.display = 'none';
+        
+        // Aggiunge una notifica visiva di aggiornamento
+        const updateNotification = document.createElement('div');
+        updateNotification.id = 'map-updating-notification';
+        updateNotification.style.position = 'absolute';
+        updateNotification.style.top = '10px';
+        updateNotification.style.left = '50%';
+        updateNotification.style.transform = 'translateX(-50%)';
+        updateNotification.style.padding = '5px 15px';
+        updateNotification.style.backgroundColor = 'rgba(52, 152, 219, 0.8)';
+        updateNotification.style.color = 'white';
+        updateNotification.style.borderRadius = '4px';
+        updateNotification.style.zIndex = '1000';
+        updateNotification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        updateNotification.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Aggiornamento mappa...';
+        
+        const mapContainer = document.getElementById('stations-map');
+        if (mapContainer && !document.getElementById('map-updating-notification')) {
+            mapContainer.style.position = 'relative';
+            mapContainer.appendChild(updateNotification);
+        }
+        
+        // Rimuove tutti i marker esistenti
+        clearMarkers();
+        
+        try {
+            // Include time_slot e duration se forniti per calcolare la disponibilità
+            const timeSlotVal = timeSlotInput.value;
+            const durationVal = durationSelect.value;
+            
+            // Include filtri carburante e specifiche tecniche
+            const selectedFuel = getSelectedFuelType();
+            const electricConnector = document.getElementById('electric-connector').value;
+            const electricPower = document.getElementById('electric-power').value;
+            const hydrogenPressure = document.getElementById('hydrogen-pressure').value;
+            const hydrogenFlow = document.getElementById('hydrogen-flow').value;
+            
+            let url = `/auth/api/stations?city=${encodeURIComponent(city || '')}`;
+            if (timeSlotVal) url += `&time_slot=${encodeURIComponent(timeSlotVal)}`;
+            if (durationVal) url += `&duration=${encodeURIComponent(durationVal)}`;
+            if (selectedFuel) url += `&fuel_type=${encodeURIComponent(selectedFuel)}`;
+            if (electricConnector) url += `&connector_type=${encodeURIComponent(electricConnector)}`;
+            if (electricPower) url += `&min_power=${encodeURIComponent(electricPower)}`;
+            if (hydrogenPressure) url += `&pressure=${encodeURIComponent(hydrogenPressure)}`;
+            if (hydrogenFlow) url += `&min_flow=${encodeURIComponent(hydrogenFlow)}`;
+            
+            console.log("Fetching stations with URL:", url);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Errore nel recupero delle stazioni');
+            }
+            
+            const data = await response.json();
+            
+            if (data.success && data.stations.length > 0) {
+                console.log(`Caricate ${data.stations.length} stazioni`);
+                
+                // Aggiungi i marker alla mappa
+                addMarkers(data.stations);
+                
+                // Centra la mappa in base alla ricerca
+                if (city && data.stations.length > 0) {
+                    // Se c'è una ricerca per città, centra sulla prima stazione
+                    const firstStation = data.stations[0];
+                    map.setView([firstStation.lat, firstStation.lng], 12);
+                } else if (data.stations.length > 0) {
+                    // Altrimenti calcola il bounding box di tutte le stazioni
+                    const bounds = L.latLngBounds(data.stations.map(s => [s.lat, s.lng]));
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+                
+                // Se c'è già una stazione selezionata, riselezionala sulla mappa
+                if (selectedStationId) {
+                    const selectedStation = data.stations.find(s => s.id === selectedStationId);
+                    if (selectedStation) {
+                        const marker = markers.find(m => m.options.stationId === selectedStationId);
+                        if (marker) {
+                            selectMarker(marker, selectedStationId, selectedStation.name);
+                        }
+                    }
+                }
+                
+                // Nascondi il messaggio "nessun risultato"
+                if (noResults) noResults.style.display = 'none';
+            } else {
+                // Nessuna stazione trovato
+                console.log("Nessuna stazione trovata");
+                if (noResults) noResults.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Errore durante il recupero delle stazioni:', error);
+            if (mapLoading) mapLoading.style.display = 'none';
+            alert('Errore nel recupero delle stazioni. Riprova più tardi.');
+        } finally {
+            // Nascondi l'indicatore di caricamento
+            if (mapLoading) mapLoading.style.display = 'none';
+            // Rimuovi la notifica di aggiornamento
+            const notification = document.getElementById('map-updating-notification');
+            if (notification) notification.remove();
+        }
+    }
+    
+    // Funzione per aggiungere marker alla mappa
+    function addMarkers(stations) {
+        // Controlla se è stato selezionato un time slot
+        const timeSlotVal = timeSlotInput.value;
+        stations.forEach(station => {
+            // Customize icons based on availability
+            const availableIconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png';
+            const unavailableIconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+            const defaultIconUrl = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/images/marker-icon.png';
+            
+            // Use different icons based on availability when time slot is selected
+            const iconUrl = !timeSlotVal ? defaultIconUrl : (station.available ? availableIconUrl : unavailableIconUrl);
+            
+            const markerIcon = L.icon({
+                iconUrl: iconUrl,
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
+            });
+            
+            const marker = L.marker([station.lat, station.lng], { 
+                icon: markerIcon,
+                stationId: station.id,  // Store station ID with the marker
+                stationName: station.name,  // Store station name with the marker
+                available: station.available // Store availability with the marker
+            }).addTo(map);
+            
+            // Costruisci il contenuto del popup: mostra disponibilità solo se time slot selezionato
+            const availableDevices = station.available_devices || 0;
+            const totalDevices = station.total_devices || 0;
+            const availabilityInfo = !timeSlotVal ? '' : `
+                <p style="margin: 0 0 8px 0; color: ${station.available ? 'green' : 'red'};">
+                    ${station.available ? `Disponibile (${availableDevices}/${totalDevices} dispositivi)` : 'Non disponibile'}
+                </p>`;
+            
+            // Enhanced popup with multi-fuel support
+            const fuelTypesDisplay = station.fuel_types ? station.fuel_types.map(fuel => {
+                const icons = {
+                    'electric': '⚡',
+                    'hydrogen': '🔋'
+                };
+                return `${icons[fuel] || '🔋'} ${fuel}`;
+            }).join(' ') : '⚡ elettrico';
+            
+            const stationTypeDisplay = station.station_type === 'hybrid' ? '🔄 Ibrida' : 
+                                     station.station_type === 'hydrogen' ? '🔋 Idrogeno' : 
+                                     '⚡ Elettrica';
+            
+            marker.bindPopup(`
+                <div style="text-align: center; padding: 5px; min-width: 220px;">
+                    <h3 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 16px;">${station.name}</h3>
+                    <p style="margin: 0 0 4px 0; color: #27ae60; font-size: 13px; font-weight: bold;">${stationTypeDisplay}</p>
+                    <p style="margin: 0 0 4px 0; color: #3498db; font-size: 12px;">${fuelTypesDisplay}</p>
+                    <p style="margin: 0 0 8px 0; color: #7f8c8d; font-size: 11px;">ID: ${station.id}</p>
+                    <p style="margin: 0 0 8px 0; font-size: 13px;">${station.address}</p>
+                    ${availabilityInfo}
+                    <button onclick="selectStation('${station.id}', '${station.name.replace(/'/g, "\\'")}', ${station.available}, this)" 
+                            style="background-color: #3498db; color: white; border: none; padding: 8px 15px; 
+                            border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 5px; 
+                            transition: all 0.2s;">
+                        <i class="fas fa-check-circle"></i> Seleziona questa stazione
+                    </button>
+                </div>
+            `);
+            
+            // Add click handler to select station even when clicking on the marker itself
+            marker.on('click', function() {
+                // If already selected, this just opens the popup
+                if (this.options.stationId !== selectedStationId) {
+                    // Visual feedback for popup opening
+                    marker._icon.classList.add('clicked-marker');
+                    setTimeout(() => {
+                        if (marker._icon) marker._icon.classList.remove('clicked-marker');
+                    }, 300);
+                }
+            });
+            
+            markers.push(marker);
+            
+            // If this is the selected station, highlight it
+            if (station.id === selectedStationId) {
+                selectMarker(marker, station.id, station.name);
+                
+                // Se è stata selezionata una stazione e c'è un time slot, aggiorna lo stato del pulsante in base alla disponibilità
+                if (timeSlotVal) {
+                    updateBookButtonState(station.available);
+                }
+            }
+        });
+    }
+    
+    // Funzione globale per selezionare una stazione (chiamata dal popup)
+    window.selectStation = function(stationId, stationName, isAvailable, buttonElement) {
+        // Aggiorna l'input del form con l'ID della stazione selezionata
+        document.getElementById('station-id').value = stationName;  // Mostra il nome invece dell'ID
+        document.getElementById('station-id').classList.add('selected-station');
+        
+        // Nascondi le istruzioni
+        const instructions = document.getElementById('station-selection-instructions');
+        if (instructions) {
+            instructions.style.display = 'none';
+        }
+        
+        // Feedback visivo che mostra il nome della stazione selezionata
+        const feedback = document.querySelector('.station-selection-feedback');
+        if (feedback) {
+            feedback.innerHTML = `<i class="fas fa-check-circle"></i> Stazione selezionata: <strong>${stationName}</strong>`;
+            feedback.style.display = 'block';
+        }
+        
+        // Salva l'ID nascosto per la prenotazione
+        if (!document.getElementById('hidden-station-id')) {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = 'hidden-station-id';
+            hiddenInput.name = 'hidden_station_id';
+            document.getElementById('booking-form').appendChild(hiddenInput);
+        }
+        document.getElementById('hidden-station-id').value = stationId;
+        
+        // Trova e seleziona il marker corrispondente
+        const marker = markers.find(m => m.options.stationId === stationId);
+        if (marker) {
+            selectMarker(marker, stationId, stationName);
+        }
+        
+        // Se è già stato selezionato un orario, aggiorna lo stato del pulsante di prenotazione
+        const timeSlot = document.getElementById('time-slot').value;
+        if (timeSlot) {
+            updateBookButtonState(isAvailable);
+        }
+        
+        // Animazione pulsante di selezione nel popup (opzionale)
+        if (buttonElement) {
+            buttonElement.innerHTML = '<i class="fas fa-check"></i> Stazione selezionata';
+            buttonElement.style.backgroundColor = '#2ecc71';
+            setTimeout(() => {
+                if (buttonElement) buttonElement.innerHTML = '<i class="fas fa-check-circle"></i> Seleziona questa stazione';
+                if (buttonElement) buttonElement.style.backgroundColor = '#3498db';
+            }, 1500);
+        }
+        
+        // Aggiorna tutte le altre istanze del popup che potrebbero essere aperte
+        markers.forEach(m => {
+            if (m.isPopupOpen() && m.options.stationId !== stationId) {
+                m.closePopup();
+            }
+        });
+    };
+    
+    // Helper function to visually select a marker
+    function selectMarker(marker, stationId, stationName) {
+        // Reset previous selected marker
+        if (selectedMarker && selectedMarker._icon) {
+            selectedMarker._icon.classList.remove('selected-marker');
+        }
+        
+        // Highlight the new marker
+        if (marker && marker._icon) {
+            marker._icon.classList.add('selected-marker');
+        }
+        
+        selectedMarker = marker;
+        selectedStationId = stationId;
+    }
+    
+    // Funzione per rimuovere la selezione della stazione
+    function clearStationSelection() {
+        document.getElementById('station-id').value = '';
+        document.getElementById('station-id').placeholder = 'Nessuna stazione selezionata';
+        document.getElementById('station-id').classList.remove('selected-station');
+        
+        // Mostra di nuovo le istruzioni
+        const instructions = document.getElementById('station-selection-instructions');
+        if (instructions) {
+            instructions.style.display = 'block';
+        }
+        
+        const feedback = document.querySelector('.station-selection-feedback');
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+        
+        // Pulisci l'input nascosto per l'ID stazione
+        const hiddenInput = document.getElementById('hidden-station-id');
+        if (hiddenInput) {
+            hiddenInput.value = '';
+        }
+        
+        if (selectedMarker && selectedMarker._icon) {
+            selectedMarker._icon.classList.remove('selected-marker');
+        }
+        
+        selectedMarker = null;
+        selectedStationId = null;
+        
+        // Reimposta lo stato del pulsante di prenotazione
+        resetBookButtonState();
+    }
+    
+    // Funzione per rimuovere i marker dalla mappa
+    function clearMarkers() {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+    }
+    
+    // Funzione per aggiornare lo stato visivo del pulsante di prenotazione
+    function updateBookButtonState(isAvailable) {
+        if (!bookButton) return;
+        
+        const primaryColor = '#3498db'; // Colore blu originale
+        const availableColor = '#2ecc71'; // Verde
+        const unavailableColor = '#e74c3c'; // Rosso
+        
+        if (isAvailable) {
+            // Stazione disponibile - pulsante verde e attivo
+            bookButton.style.backgroundColor = availableColor;
+            bookButton.style.opacity = '1';
+            bookButton.disabled = false;
+            bookButton.innerHTML = '<i class="fas fa-bolt"></i> Prenota';
+        } else {
+            // Stazione non disponibile - pulsante rosso e disabilitato
+            bookButton.style.backgroundColor = unavailableColor;
+            bookButton.style.opacity = '0.8';
+            bookButton.disabled = true;
+            bookButton.innerHTML = '<i class="fas fa-times-circle"></i> Non disponibile';
+        }
+    }
+    
+    // Funzione per reimpostare il pulsante di prenotazione allo stato originale
+    function resetBookButtonState() {
+        if (!bookButton) return;
+        
+        const primaryColor = '#3498db'; // Colore blu originale
+        
+        bookButton.style.backgroundColor = primaryColor;
+        bookButton.style.opacity = '0.7';
+        bookButton.disabled = false;
+        bookButton.innerHTML = '<i class="fas fa-bolt"></i> Prenota';
+    }
+    
+    // Event listener per il pulsante di ricerca
+    searchButton.addEventListener('click', function() {
+        const city = citySearch.value.trim();
+        fetchStations(city);
+    });
+    
+    // Event listener per la pressione di Enter nel campo di ricerca
+    citySearch.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const city = citySearch.value.trim();
+            fetchStations(city);
+        }
+    });
+    
+    // Event listener per cambiamenti nel campo time-slot
+    timeSlotInput.addEventListener('change', function() {
+        // Se c'è una stazione selezionata, aggiorna la mappa per mostrare disponibilità
+        if (selectedStationId || stationIdInput.value) {
+            const city = citySearch.value.trim();
+            fetchStations(city);
+            
+            // Resetta lo stato di disponibilità
+            lastAvailability = null;
+            bookingResult.style.display = 'none';
+            
+            // Reset visual state of book button
+            resetBookButtonState();
+        }
+    });
+    
+    // Event listener per il pulsante "Verifica disponibilità"
+    checkAvailabilityBtn.addEventListener('click', async function() {
+        const stationId = document.getElementById('hidden-station-id') ? document.getElementById('hidden-station-id').value : null;
+        const timeSlot = getValidatedTimeSlot();
+        const duration = durationSelect.value;
+        bookingResult.style.display = 'block';
+        bookingResult.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Verifica disponibilità in corso...</div>';
+        lastAvailability = null;
+        resetBookButtonState();
+        if (!stationId || !timeSlot) {
+            bookingResult.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Seleziona una stazione e una data/ora valida prima di verificare la disponibilità.</div>`;
+            return;
+        }
+        try {
+            // Chiamata API per verifica disponibilità (usiamo la stessa logica della prenotazione, ma solo verifica)
+            const response = await fetch('/auth/user/book_charging', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    station_id: stationId, 
+                    time_slot: timeSlot, 
+                    duration: duration, 
+                    check_only: true,
+                    fuel_type: getSelectedFuelType(),
+                    connector_type: getSelectedConnectorType(),
+                    min_power: document.getElementById('electric-power').value,
+                    min_flow: document.getElementById('hydrogen-flow').value
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                bookingResult.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle"></i> La stazione è disponibile nell'orario selezionato!</div>`;
+                lastAvailability = true;
+                
+                // Aggiorna lo stato visivo del pulsante di prenotazione
+                updateBookButtonState(true);
+            } else {
+                bookingResult.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Mi dispiace, la stazione è già prenotata o non disponibile.<br><small>${data.error || ''}</small></div>`;
+                lastAvailability = false;
+                
+                // Aggiorna lo stato visivo del pulsante di prenotazione
+                updateBookButtonState(false);
+            }
+        } catch (error) {
+            bookingResult.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Errore nella verifica disponibilità.</div>`;
+            lastAvailability = null;
+            
+            // Reset visual state of book button
+            resetBookButtonState();
+        }
+    });
+    
+    // Event listener per il form di prenotazione
+    document.getElementById('booking-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const stationId = document.getElementById('hidden-station-id') ? document.getElementById('hidden-station-id').value : null;
+        const timeSlot = getValidatedTimeSlot();
+        const duration = document.getElementById('duration').value;
+        if (!stationId || !timeSlot) {
+            bookingResult.style.display = 'block';
+            bookingResult.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Per completare la prenotazione:${!stationId ? '<br>• Seleziona una stazione dalla mappa (clicca su un marker)' : ''}${!timeSlot ? '<br>• Seleziona una data/ora valida per la tua ricarica' : ''}</div>`;
+            return;
+        }
+        
+        if (lastAvailability === false) {
+            bookingResult.style.display = 'block';
+            bookingResult.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Non puoi prenotare: la stazione non è disponibile nell'orario scelto.</div>`;
+            return;
+        }
+        
+        const resultDiv = document.getElementById('booking-result');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-spinner fa-spin"></i> Invio della prenotazione in corso...
+            </div>
+        `;
+        
+        try {
+            const response = await fetch('/auth/user/book_charging', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    station_id: stationId,
+                    time_slot: timeSlot,
+                    duration: duration,
+                    fuel_type: getSelectedFuelType(),
+                    connector_type: getSelectedConnectorType(),
+                    min_power: document.getElementById('electric-power').value,
+                    min_flow: document.getElementById('hydrogen-flow').value
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h3 style="margin-top: 0;"><i class="fas fa-check-circle"></i> Prenotazione confermata!</h3>
+                        <p><strong><i class="fas fa-charging-station"></i> Stazione:</strong> ${data.details.station}</p>
+                        <p><strong><i class="fas fa-clock"></i> Inizio:</strong> ${data.details.start_time}</p>
+                        <p><strong><i class="fas fa-hourglass-end"></i> Fine:</strong> ${data.details.end_time}</p>
+                        <p><strong><i class="fas fa-plug"></i> Dispositivo:</strong> ${data.details.device_id}</p>
+                    </div>
+                `;
+                
+                // Reset form and selection state
+                document.getElementById('booking-form').reset();
+                clearStationSelection();
+                
+                // Aggiorna la mappa dopo la prenotazione per riflettere la disponibilità aggiornata
+                const city = citySearch.value.trim();
+                fetchStations(city);
+                
+                // Aggiorna anche la lista delle prenotazioni
+                fetchBookings();
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-warning">
+                        <h3 style="margin-top: 0;"><i class="fas fa-exclamation-triangle"></i> Errore nella prenotazione</h3>
+                        <p>${data.error}</p>
+                    </div>
+                `;
+                
+                // Aggiorna lo stato visivo del pulsante
+                updateBookButtonState(false);
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <h3 style="margin-top: 0;"><i class="fas fa-exclamation-triangle"></i> Errore nella richiesta</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+            
+            // Reset visual state of book button
+            resetBookButtonState();
+        }
+    });
+    
+    // Funzione per annullare una prenotazione
+    window.cancelBooking = async function(bookingId) {
+        if (!confirm(`Sei sicuro di voler annullare la prenotazione #${bookingId}?`)) return;
+        try {
+            const response = await fetch(`/auth/booking/cancel/${bookingId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'same-origin',
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(data.message);
+                fetchBookings();
+            } else {
+                alert(data.error || 'Errore nell\'annullamento della prenotazione.');
+            }
+        } catch (error) {
+            console.error('Errore nella richiesta di annullamento:', error);
+            alert('Errore di rete nell\'annullamento della prenotazione.');
+        }
+    };
+    
+    // Funzione per visualizzare i dettagli della prenotazione nel modal
+    window.viewBookingDetails = function(bookingId) {
+        const booking = window.bookings.find(b => b.id === bookingId);
+        if (!booking) return;
+        
+        const startDate = new Date(booking.scheduled_start);
+        const endDate = new Date(booking.scheduled_end);
+        
+        // Formatta le date in italiano
+        const startFormatted = startDate.toLocaleString('it-IT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const endFormatted = endDate.toLocaleString('it-IT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Popola il modal con i dettagli della prenotazione
+        document.getElementById('booking-modal-body').innerHTML = `
+            <h3 style="margin-top: 0;">Dettagli Prenotazione #${booking.id}</h3>
+            <p><strong>Stazione:</strong> ${booking.station_name || booking.station_id}</p>
+            <p><strong>Dispositivo:</strong> ${booking.charging_point_name || booking.charging_point_id}</p>
+            <p><strong>Data e Ora Inizio:</strong> ${startFormatted}</p>
+            <p><strong>Data e Ora Fine:</strong> ${endFormatted}</p>
+            <p><strong>Durata:</strong> ${booking.duration} minuti</p>
+            <p><strong>Stato:</strong> ${booking.status}</p>
+        `;
+        
+        window.currentModalBookingId = bookingId;
+        
+        // Mostra il modal
+        document.getElementById('booking-modal-overlay').style.display = 'flex';
+    };
+    
+    // Chiudi il modal quando si clicca sulla "x" o fuori dal contenuto del modal
+    document.getElementById('modal-close-x').addEventListener('click', closeModal);
+    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+    
+    function closeModal() {
+        document.getElementById('booking-modal-overlay').style.display = 'none';
+    }
+    
+    // Aggiungi listener per il pulsante di cancellazione nel modal
+    document.getElementById('modal-cancel-btn').addEventListener('click', function() {
+      if (window.currentModalBookingId) {
+        cancelBooking(window.currentModalBookingId);
+        closeModal();
+      }
+    });
+});
+</script>
+{% endblock %}

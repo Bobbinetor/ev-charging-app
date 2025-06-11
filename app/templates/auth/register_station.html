@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% block title %}Registrazione Stazione - Sustainable Mobility Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<style>
+    .fuel-types-container {
+        display: flex;
+        gap: 15px;
+        margin-top: 8px;
+    }
+    
+    .fuel-type-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 6px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .fuel-type-option:hover {
+        border-color: var(--primary-color);
+        background-color: #fff;
+    }
+    
+    .fuel-type-option input[type="checkbox"]:checked + label,
+    .fuel-type-option:has(input[type="checkbox"]:checked) {
+        border-color: var(--primary-color);
+        background-color: rgba(0, 77, 153, 0.1);
+    }
+    
+    #electric-fields {
+        margin-top: 20px;
+        padding: 20px;
+        border: 2px dashed #007bff;
+        border-radius: 8px;
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    #electric-fields h4 {
+        color: #007bff;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    #electric-fields h4:before {
+        content: "⚡";
+        font-size: 1.2em;
+    }
+    
+    #hydrogen-fields {
+        margin-top: 20px;
+        padding: 20px;
+        border: 2px dashed #28a745;
+        border-radius: 8px;
+        background-color: rgba(40, 167, 69, 0.05);
+    }
+    
+    #hydrogen-fields h4 {
+        color: #28a745;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    #hydrogen-fields h4:before {
+        content: "🔋";
+        font-size: 1.2em;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Registrazione Stazione</h2>
+            <p>Registra la tua infrastruttura di mobilità sostenibile</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.register_station') }}" class="auth-form">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                <label for="station_name">Nome Stazione</label>
+                {{ form.station_name(class="form-control", placeholder="Nome della stazione") }}
+                {% if form.station_name.errors %}
+                    <div class="error-message">
+                        {% for error in form.station_name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="company">Azienda</label>
+                {{ form.company(class="form-control", placeholder="Nome dell'azienda") }}
+                {% if form.company.errors %}
+                    <div class="error-message">
+                        {% for error in form.company.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="vat_number">Partita IVA</label>
+                {{ form.vat_number(class="form-control", placeholder="Partita IVA dell'azienda") }}
+                {% if form.vat_number.errors %}
+                    <div class="error-message">
+                        {% for error in form.vat_number.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Indirizzo</label>
+                {{ form.address(class="form-control", placeholder="Indirizzo della stazione") }}
+                {% if form.address.errors %}
+                    <div class="error-message">
+                        {% for error in form.address.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="latitude">Latitudine</label>
+                    {{ form.latitude(class="form-control", placeholder="Latitudine") }}
+                    {% if form.latitude.errors %}
+                        <div class="error-message">
+                            {% for error in form.latitude.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group col-md-6">
+                    <label for="longitude">Longitudine</label>
+                    {{ form.longitude(class="form-control", placeholder="Longitudine") }}
+                    {% if form.longitude.errors %}
+                        <div class="error-message">
+                            {% for error in form.longitude.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                {{ form.email(class="form-control", placeholder="Email per la gestione della stazione") }}
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        {% for error in form.email.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Telefono</label>
+                {{ form.phone(class="form-control", placeholder="Numero di telefono della stazione") }}
+                {% if form.phone.errors %}
+                    <div class="error-message">
+                        {% for error in form.phone.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Nuovi campi per mobilità sostenibile -->
+            <div class="form-group">
+                <label for="station_type">Tipo di Stazione</label>
+                {{ form.station_type(class="form-control", id="station_type") }}
+                {% if form.station_type.errors %}
+                    <div class="error-message">
+                        {% for error in form.station_type.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="fuel_types">Tipi di Carburante Supportati</label>
+                <div class="fuel-types-container">
+                    {% for subfield in form.fuel_types %}
+                        <div class="fuel-type-option">
+                            {{ subfield() }}
+                            {{ subfield.label }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if form.fuel_types.errors %}
+                    <div class="error-message">
+                        {% for error in form.fuel_types.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Campi specifici per elettrico (visibili condizionalmente) -->
+            <div id="electric-fields" style="display: none;">
+                <h4>Configurazione Elettrica</h4>
+                
+                <div class="form-group">
+                    <label for="electric_power">Potenza Massima (kW)</label>
+                    {{ form.electric_power(class="form-control", placeholder="50", step="0.1", min="1") }}
+                    {% if form.electric_power.errors %}
+                        <div class="error-message">
+                            {% for error in form.electric_power.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="connector_types">Tipi di Connettori</label>
+                    <div class="fuel-types-container">
+                        {% for subfield in form.connector_types %}
+                            <div class="fuel-type-option">
+                                {{ subfield() }}
+                                {{ subfield.label }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.connector_types.errors %}
+                        <div class="error-message">
+                            {% for error in form.connector_types.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Campi specifici per idrogeno (visibili condizionalmente) -->
+            <div id="hydrogen-fields" style="display: none;">
+                <h4>Configurazione Idrogeno</h4>
+                
+                <div class="form-group">
+                    <label for="hydrogen_storage_capacity">Capacità Stoccaggio H2 (kg)</label>
+                    {{ form.hydrogen_storage_capacity(class="form-control", placeholder="1000") }}
+                    {% if form.hydrogen_storage_capacity.errors %}
+                        <div class="error-message">
+                            {% for error in form.hydrogen_storage_capacity.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="hydrogen_purity">Purezza Idrogeno (%)</label>
+                    {{ form.hydrogen_purity(class="form-control", placeholder="99.97") }}
+                    {% if form.hydrogen_purity.errors %}
+                        <div class="error-message">
+                            {% for error in form.hydrogen_purity.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="max_dispensing_pressure">Pressione Massima</label>
+                    {{ form.max_dispensing_pressure(class="form-control") }}
+                    {% if form.max_dispensing_pressure.errors %}
+                        <div class="error-message">
+                            {% for error in form.max_dispensing_pressure.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                {{ form.password(class="form-control", placeholder="Password per l'account") }}
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="password2">Conferma Password</label>
+                {{ form.password2(class="form-control", placeholder="Conferma la password") }}
+                {% if form.password2.errors %}
+                    <div class="error-message">
+                        {% for error in form.password2.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <div class="terms-conditions">
+                    {{ form.accept_terms() }}
+                    <label for="accept_terms">Accetto i <a href="{{ url_for('main.terms') }}">Termini e Condizioni</a> e la <a href="{{ url_for('main.privacy') }}">Privacy Policy</a></label>
+                </div>
+                {% if form.accept_terms.errors %}
+                    <div class="error-message">
+                        {% for error in form.accept_terms.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Hai già un account? <a href="{{ url_for('auth.login') }}">Accedi</a></p>
+        </div>
+    </div>
+    
+    <div class="auth-info">
+        <div class="auth-info-content">
+            <h3>Vantaggi per i gestori di infrastrutture</h3>
+            <p>Unisciti alla rete di mobilità sostenibile</p>
+            <ul>
+                <li><i class="fas fa-users"></i> Accesso a migliaia di utenti</li>
+                <li><i class="fas fa-leaf"></i> Supporto elettrico e idrogeno</li>
+                <li><i class="fas fa-chart-line"></i> Analisi dettagliate sull'utilizzo</li>
+                <li><i class="fas fa-atom"></i> Digital twin IoT con FIWARE</li>
+                <li><i class="fas fa-tools"></i> Gestione semplificata</li>
+                <li><i class="fas fa-headset"></i> Supporto tecnico dedicato</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/register_station.js') }}"></script>
+{% endblock %}
